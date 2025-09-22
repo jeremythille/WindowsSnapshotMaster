@@ -5,19 +5,33 @@ Ever switch monitor configs on your laptop and all of your windows are squished 
 
 WindowsLayoutSnapshot is a modern .NET 8 Windows app to remember and restore window positions.
 
+## Project Structure
+
+- `source/` - Contains all source code and development files
+- `program/` - Contains the final executable ready for distribution
+
 ## Building and Running
 
 To build the application:
 ```bash
+cd source
 dotnet build
 ```
 
-To run the application:
+To run the application from source:
 ```bash
+cd source
 dotnet run
 ```
 
-The built executable will be located at `bin/Debug/net8.0-windows/WindowsLayoutSnapshot.exe`. There's no installer; just run the executable or put it in your Startup folder to have it start automatically.
+## Distribution
+
+The final executable is located in the `program/` folder:
+- `WindowsLayoutSnapshot.exe` - Main executable
+- `WindowsLayoutSnapshot.dll` - Application assembly
+- `WindowsLayoutSnapshot.runtimeconfig.json` - Runtime configuration
+
+There's no installer; just run `program/WindowsLayoutSnapshot.exe` or put it in your Startup folder to have it start automatically.
 
 ## Features
 
