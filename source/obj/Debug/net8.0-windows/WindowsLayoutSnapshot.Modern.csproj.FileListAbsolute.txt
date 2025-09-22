@@ -1,0 +1,15 @@
+D:\dev\WindowsLayoutSnapshot\WindowsLayoutSnapshot.Modern\bin\Debug\net8.0-windows\WindowsLayoutSnapshot.exe
+D:\dev\WindowsLayoutSnapshot\WindowsLayoutSnapshot.Modern\bin\Debug\net8.0-windows\WindowsLayoutSnapshot.deps.json
+D:\dev\WindowsLayoutSnapshot\WindowsLayoutSnapshot.Modern\bin\Debug\net8.0-windows\WindowsLayoutSnapshot.runtimeconfig.json
+D:\dev\WindowsLayoutSnapshot\WindowsLayoutSnapshot.Modern\bin\Debug\net8.0-windows\WindowsLayoutSnapshot.dll
+D:\dev\WindowsLayoutSnapshot\WindowsLayoutSnapshot.Modern\bin\Debug\net8.0-windows\WindowsLayoutSnapshot.pdb
+D:\dev\WindowsLayoutSnapshot\WindowsLayoutSnapshot.Modern\obj\Debug\net8.0-windows\WindowsLayoutSnapshot.Modern.GeneratedMSBuildEditorConfig.editorconfig
+D:\dev\WindowsLayoutSnapshot\WindowsLayoutSnapshot.Modern\obj\Debug\net8.0-windows\WindowsLayoutSnapshot.Modern.AssemblyInfoInputs.cache
+D:\dev\WindowsLayoutSnapshot\WindowsLayoutSnapshot.Modern\obj\Debug\net8.0-windows\WindowsLayoutSnapshot.Modern.AssemblyInfo.cs
+D:\dev\WindowsLayoutSnapshot\WindowsLayoutSnapshot.Modern\obj\Debug\net8.0-windows\WindowsLayoutSnapshot.Modern.csproj.CoreCompileInputs.cache
+D:\dev\WindowsLayoutSnapshot\WindowsLayoutSnapshot.Modern\obj\Debug\net8.0-windows\WindowsLayoutSnapshot.Modern.sourcelink.json
+D:\dev\WindowsLayoutSnapshot\WindowsLayoutSnapshot.Modern\obj\Debug\net8.0-windows\WindowsLayoutSnapshot.dll
+D:\dev\WindowsLayoutSnapshot\WindowsLayoutSnapshot.Modern\obj\Debug\net8.0-windows\refint\WindowsLayoutSnapshot.dll
+D:\dev\WindowsLayoutSnapshot\WindowsLayoutSnapshot.Modern\obj\Debug\net8.0-windows\WindowsLayoutSnapshot.pdb
+D:\dev\WindowsLayoutSnapshot\WindowsLayoutSnapshot.Modern\obj\Debug\net8.0-windows\WindowsLayoutSnapshot.Modern.genruntimeconfig.cache
+D:\dev\WindowsLayoutSnapshot\WindowsLayoutSnapshot.Modern\obj\Debug\net8.0-windows\ref\WindowsLayoutSnapshot.dll

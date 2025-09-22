@@ -1,0 +1,15 @@
+D:\dev\WindowsLayoutSnapshot\program\WindowsLayoutMaster.exe
+D:\dev\WindowsLayoutSnapshot\program\icon.ico
+D:\dev\WindowsLayoutSnapshot\program\WindowsLayoutMaster.deps.json
+D:\dev\WindowsLayoutSnapshot\program\WindowsLayoutMaster.runtimeconfig.json
+D:\dev\WindowsLayoutSnapshot\program\WindowsLayoutMaster.dll
+D:\dev\WindowsLayoutSnapshot\program\WindowsLayoutMaster.pdb
+D:\dev\WindowsLayoutSnapshot\source\obj\Debug\WindowsLayoutMaster.GeneratedMSBuildEditorConfig.editorconfig
+D:\dev\WindowsLayoutSnapshot\source\obj\Debug\WindowsLayoutMaster.AssemblyInfoInputs.cache
+D:\dev\WindowsLayoutSnapshot\source\obj\Debug\WindowsLayoutMaster.AssemblyInfo.cs
+D:\dev\WindowsLayoutSnapshot\source\obj\Debug\WindowsLayoutMaster.csproj.CoreCompileInputs.cache
+D:\dev\WindowsLayoutSnapshot\source\obj\Debug\WindowsLayoutMaster.dll
+D:\dev\WindowsLayoutSnapshot\source\obj\Debug\refint\WindowsLayoutMaster.dll
+D:\dev\WindowsLayoutSnapshot\source\obj\Debug\WindowsLayoutMaster.pdb
+D:\dev\WindowsLayoutSnapshot\source\obj\Debug\WindowsLayoutMaster.genruntimeconfig.cache
+D:\dev\WindowsLayoutSnapshot\source\obj\Debug\ref\WindowsLayoutMaster.dll
