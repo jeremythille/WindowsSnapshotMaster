@@ -36,8 +36,8 @@ public partial class TrayIconForm : Form
         _snapshotsFilePath = Path.Combine(_config.SnapshotsDirectory, "snapshots.json");
         _ = Logger.InfoAsync($"Initializing TrayIconForm with AutoSnapshotIntervalMinutes: {config.AutoSnapshotIntervalMinutes}");
 
-        // Initialize custom popup
-        _popup = new TrayPopupForm(OnMenuItemClick);
+        // Initialize custom popup with preview functionality
+        _popup = new TrayPopupForm(OnMenuItemClick, OnPreviewSnapshot, GetSnapshotByIndex);
 
         InitializeComponent();        // Configure form
         WindowState = FormWindowState.Minimized;
@@ -157,6 +157,84 @@ public partial class TrayIconForm : Form
                 }
                 break;
         }
+    }
+
+    private void OnPreviewSnapshot(Snapshot? snapshot)
+    {
+        if (snapshot != null)
+        {
+            // Apply preview snapshot - only on current virtual desktop
+            _ = RestoreSnapshotForPreviewAsync(snapshot);
+        }
+        else
+        {
+            // Restore original layout - we need to get the original from the popup
+            var originalSnapshot = _popup.GetOriginalSnapshot();
+            if (originalSnapshot != null)
+            {
+                _ = RestoreSnapshotForPreviewAsync(originalSnapshot);
+            }
+        }
+    }
+
+    private async Task RestoreSnapshotForPreviewAsync(Snapshot snapshot)
+    {
+        try
+        {
+            // For preview, get the current virtual desktop and only restore windows on it
+            await Task.Run(() =>
+            {
+                // Get all currently visible windows on this virtual desktop
+                var currentDesktopWindows = GetCurrentDesktopWindows();
+                
+                foreach (var windowInfo in snapshot.Windows)
+                {
+                    IntPtr targetHandle = windowInfo.Handle;
+                    
+                    // If handle is null/invalid, try to find by title
+                    if (targetHandle == IntPtr.Zero || !WindowManager.IsWindowVisiblePublic(targetHandle))
+                    {
+                        targetHandle = WindowManager.FindWindowByTitle(windowInfo.Title);
+                        if (targetHandle == IntPtr.Zero)
+                            continue;
+                    }
+
+                    // Only restore if window is currently on this virtual desktop
+                    if (currentDesktopWindows.Contains(targetHandle))
+                    {
+                        WindowManager.RestoreWindow(windowInfo);
+                    }
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _ = Logger.ErrorAsync("Error during preview restore", ex);
+        }
+    }
+
+    private HashSet<IntPtr> GetCurrentDesktopWindows()
+    {
+        var currentWindows = new HashSet<IntPtr>();
+        
+        // Enumerate all top-level windows and check if they're visible and not minimized
+        WindowManager.EnumWindows((hWnd, lParam) =>
+        {
+            if (WindowManager.IsWindowVisiblePublic(hWnd) && 
+                !WindowManager.IsWindowIconic(hWnd) && // Not minimized
+                WindowManager.GetWindowTitleLength(hWnd) > 0) // Has a title
+            {
+                currentWindows.Add(hWnd);
+            }
+            return true;
+        }, IntPtr.Zero);
+        
+        return currentWindows;
+    }
+
+    private Snapshot? GetSnapshotByIndex(int index)
+    {
+        return index >= 0 && index < _snapshots.Count ? _snapshots[index] : null;
     }
 
     private async void OnAutoSnapshotTimer(object? sender, EventArgs e)

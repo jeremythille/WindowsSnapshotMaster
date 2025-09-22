@@ -9,10 +9,15 @@ public partial class TrayPopupForm : Form
 {
     private readonly Action<string> _onMenuItemClick;
     private readonly List<(string text, string action, List<MonitorInfo>? monitors, long maxPixels)> _menuItems = [];
+    private Snapshot? _originalSnapshot; // Store original layout for preview restoration
+    private readonly Action<Snapshot?> _onPreviewSnapshot; // Callback for preview
+    private readonly Func<int, Snapshot?> _getSnapshotByIndex; // Callback to get snapshot by index
 
-    public TrayPopupForm(Action<string> onMenuItemClick)
+    public TrayPopupForm(Action<string> onMenuItemClick, Action<Snapshot?> onPreviewSnapshot, Func<int, Snapshot?> getSnapshotByIndex)
     {
         _onMenuItemClick = onMenuItemClick;
+        _onPreviewSnapshot = onPreviewSnapshot;
+        _getSnapshotByIndex = getSnapshotByIndex;
         InitializeForm();
     }
 
@@ -26,11 +31,27 @@ public partial class TrayPopupForm : Form
         BackColor = SystemColors.Menu;
         Font = SystemFonts.MenuFont;
         
-        // Handle deactivation to close popup
-        Deactivate += (s, e) => Hide();
+        // Handle deactivation to close popup and restore original layout
+        Deactivate += (s, e) => 
+        {
+            RestoreOriginalLayout();
+            Hide();
+        };
         
-        // Handle click outside to close popup
-        LostFocus += (s, e) => Hide();
+        // Handle click outside to close popup and restore original layout
+        LostFocus += (s, e) => 
+        {
+            RestoreOriginalLayout();
+            Hide();
+        };
+    }
+
+    private void RestoreOriginalLayout()
+    {
+        if (_originalSnapshot != null)
+        {
+            _onPreviewSnapshot(null); // Signal to restore original layout
+        }
     }
 
     public void ClearItems()
@@ -106,17 +127,30 @@ public partial class TrayPopupForm : Form
                 menuItem.Cursor = Cursors.Hand;
                 menuItem.Tag = item.action;
                 
-                // Add hover effect
+                // Add hover effect and preview functionality
                 menuItem.MouseEnter += (s, e) => 
                 {
                     menuItem.BackColor = SystemColors.Highlight;
                     menuItem.ForeColor = SystemColors.HighlightText;
+                    
+                    // Preview snapshot on hover (only for restore actions)
+                    if (item.action.StartsWith("restore-"))
+                    {
+                        var indexStr = item.action.Substring("restore-".Length);
+                        if (int.TryParse(indexStr, out int index))
+                        {
+                            _onPreviewSnapshot(GetSnapshotByIndex(index));
+                        }
+                    }
                 };
                 
                 menuItem.MouseLeave += (s, e) => 
                 {
                     menuItem.BackColor = SystemColors.Menu;
                     menuItem.ForeColor = SystemColors.MenuText;
+                    
+                    // Restore original layout when not hovering over any snapshot
+                    RestoreOriginalLayout();
                 };
                 
                 // Handle click
@@ -144,6 +178,12 @@ public partial class TrayPopupForm : Form
 
     public void ShowAt(Point location)
     {
+        // Capture the current layout before showing the menu
+        Task.Run(async () =>
+        {
+            _originalSnapshot = await Snapshot.TakeSnapshotAsync(userInitiated: false);
+        });
+        
         // Get screen bounds to adjust position if needed
         var screen = Screen.FromPoint(location);
         var workingArea = screen.WorkingArea;
@@ -173,6 +213,16 @@ public partial class TrayPopupForm : Form
         Location = location;
         Show();
         Activate(); // Ensure it gets focus for proper deactivation
+    }
+
+    private Snapshot? GetSnapshotByIndex(int index)
+    {
+        return _getSnapshotByIndex(index);
+    }
+
+    public Snapshot? GetOriginalSnapshot()
+    {
+        return _originalSnapshot;
     }
 }
 

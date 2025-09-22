@@ -35,7 +35,7 @@ public static class WindowManager
 {
     // Win32 API imports
     [DllImport("user32.dll")]
-    private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+    public static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
     
     [DllImport("user32.dll")]
     private static extern bool IsWindowVisible(IntPtr hWnd);
@@ -61,7 +61,15 @@ public static class WindowManager
     [DllImport("user32.dll")]
     private static extern bool IsIconic(IntPtr hWnd);
 
-    private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+    [DllImport("user32.dll")]
+    private static extern int GetWindowTextLength(IntPtr hWnd);
+
+    // Public wrappers for TrayIconForm
+    public static bool IsWindowIconic(IntPtr hWnd) => IsIconic(hWnd);
+    public static int GetWindowTitleLength(IntPtr hWnd) => GetWindowTextLength(hWnd);
+    public static bool IsWindowVisiblePublic(IntPtr hWnd) => IsWindowVisible(hWnd);
+    
+    public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
     
     private const int GWL_EXSTYLE = -20;
     private const long WS_EX_TOOLWINDOW = 0x00000080L;
@@ -168,7 +176,7 @@ public static class WindowManager
     /// <summary>
     /// Finds a window by its title
     /// </summary>
-    private static IntPtr FindWindowByTitle(string title)
+    public static IntPtr FindWindowByTitle(string title)
     {
         var foundHandle = IntPtr.Zero;
         
