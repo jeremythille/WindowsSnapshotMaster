@@ -83,9 +83,5 @@ Snapshots are stored in: `%APPDATA%\WindowsLayoutMaster\snapshots.json`
 * Automatic snapshots are saved every 30 minutes, with intelligent spacing for older snapshots
 
 
-#### Screenshot
-<img src="https://raw.github.com/adamsmith/WindowsLayoutSnapshot/master/screenshot.png" />
-
-
 #### License
 This app and its source code are released into the public domain.
