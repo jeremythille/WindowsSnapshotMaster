@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>monitor-window-3d-shadow.ico</ApplicationIcon>
+    <AssemblyName>WindowsLayoutSnapshot</AssemblyName>
+    <RootNamespace>WindowsLayoutSnapshot</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="monitor-window-3d-shadow.ico" />
+    <EmbeddedResource Include="Resources\glyphicons_086_display.png" />
+  </ItemGroup>
+
+</Project>
