@@ -8,7 +8,7 @@ namespace WindowsLayoutMaster;
 public partial class TrayPopupForm : Form
 {
     private readonly Action<string> _onMenuItemClick;
-    private readonly List<(string text, string action, List<MonitorInfo>? monitors, long maxPixels)> _menuItems = [];
+    private readonly List<(string text, string action, List<MonitorInfo>? monitors, long maxPixels, bool isManual)> _menuItems = [];
     private Snapshot? _originalSnapshot; // Store original layout for preview restoration
     private readonly Action<Snapshot?> _onPreviewSnapshot; // Callback for preview
     private readonly Func<int, Snapshot?> _getSnapshotByIndex; // Callback to get snapshot by index
@@ -60,14 +60,14 @@ public partial class TrayPopupForm : Form
         Controls.Clear();
     }
 
-    public void AddMenuItem(string text, string action, List<MonitorInfo>? monitors = null, long maxPixels = 0)
+    public void AddMenuItem(string text, string action, List<MonitorInfo>? monitors = null, long maxPixels = 0, bool isManual = false)
     {
-        _menuItems.Add((text, action, monitors, maxPixels));
+        _menuItems.Add((text, action, monitors, maxPixels, isManual));
     }
 
     public void AddSeparator()
     {
-        _menuItems.Add(("---", "", null, 0));
+        _menuItems.Add(("---", "", null, 0, false));
     }
 
     public void BuildMenu()
@@ -118,6 +118,12 @@ public partial class TrayPopupForm : Form
                 var menuItem = item.monitors != null && item.monitors.Count > 0 
                     ? new MonitorAwareLabel(item.text, item.monitors, item.maxPixels)
                     : new Label { Text = item.text };
+                
+                // Apply bold font for manual snapshots
+                if (item.isManual)
+                {
+                    menuItem.Font = new Font(menuItem.Font, FontStyle.Bold);
+                }
                 
                 menuItem.Left = 8;
                 menuItem.Top = y;

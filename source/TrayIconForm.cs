@@ -341,8 +341,8 @@ public partial class TrayIconForm : Form
         
         for (int i = 0; i < condensedSnapshots.Count; i++)
         {
-            var snapshot = condensedSnapshots.OrderByDescending(s => s.TimeTaken).ToList()[i];
-            _popup.AddMenuItem(snapshot.Description, $"restore-{_snapshots.IndexOf(snapshot)}", snapshot.Monitors, maxPixels);
+            var snapshot = condensedSnapshots.OrderBy(s => s.TimeTaken).ToList()[i];
+            _popup.AddMenuItem(snapshot.Description, $"restore-{_snapshots.IndexOf(snapshot)}", snapshot.Monitors, maxPixels, snapshot.UserInitiated);
         }
         
         // Additional options
@@ -413,7 +413,7 @@ public partial class TrayIconForm : Form
             remaining.RemoveAt(0);
         }
         
-        return result.OrderByDescending(s => s.TimeTaken).ToList();
+        return result.OrderBy(s => s.TimeTaken).ToList();
     }
 
     protected override void SetVisibleCore(bool value)

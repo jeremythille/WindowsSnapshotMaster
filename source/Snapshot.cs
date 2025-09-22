@@ -107,8 +107,7 @@ public class Snapshot
         var timeString = TimeTaken.ToLocalTime().ToString("MMM dd, HH:mm"); // 24h format, no AM/PM
         var windowCount = Windows.Count;
         
-        var suffix = UserInitiated ? " (Manual)" : "";
-        return $"{timeString} - {windowCount} windows{suffix}"; // Remove monitor count since icons show this
+        return $"{timeString} - {windowCount} windows"; // Remove monitor count since icons show this
     }
 }
 
