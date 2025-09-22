@@ -2,6 +2,16 @@ using WindowsLayoutSnapshot;
 
 try
 {
+    // Ensure only one instance of the application is running
+    using var mutex = new Mutex(true, "WindowsLayoutSnapshot_SingleInstance", out bool isNewInstance);
+    
+    if (!isNewInstance)
+    {
+        MessageBox.Show("Windows Layout Snapshot is already running. Check your system tray.", 
+            "Already Running", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        return;
+    }
+
     // Configure application
     Application.EnableVisualStyles();
     Application.SetCompatibleTextRenderingDefault(false);

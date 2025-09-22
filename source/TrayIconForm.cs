@@ -20,6 +20,8 @@ public partial class TrayIconForm : Form
     public TrayIconForm(AppConfig config)
     {
         _config = config;
+        _ = Logger.InfoAsync($"Initializing TrayIconForm with AutoSnapshotIntervalMinutes: {config.AutoSnapshotIntervalMinutes}");
+        
         InitializeComponent();
         
         // Configure form
@@ -28,12 +30,36 @@ public partial class TrayIconForm : Form
         Visible = false;
         
         // Initialize tray icon
+        var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "monitor-window-3d-shadow.ico");
+        Icon? trayIconIcon = null;
+        
+        try
+        {
+            if (File.Exists(iconPath))
+            {
+                trayIconIcon = new Icon(iconPath);
+                _ = Logger.InfoAsync($"Loaded custom icon from: {iconPath}");
+            }
+            else
+            {
+                _ = Logger.InfoAsync($"Custom icon not found at: {iconPath}, using system icon");
+                trayIconIcon = SystemIcons.Application;
+            }
+        }
+        catch (Exception ex)
+        {
+            _ = Logger.ErrorAsync($"Error loading icon from {iconPath}", ex);
+            trayIconIcon = SystemIcons.Application;
+        }
+        
         _trayIcon = new NotifyIcon
         {
-            Icon = new Icon("monitor-window-3d-shadow.ico"),
+            Icon = trayIconIcon,
             Text = "Windows Layout Snapshot",
             Visible = true
         };
+        
+        _ = Logger.InfoAsync("Tray icon initialized and set to visible");
         
         // Initialize context menu
         _contextMenu = new ContextMenuStrip();
@@ -43,12 +69,29 @@ public partial class TrayIconForm : Form
         _trayIcon.MouseClick += OnTrayIconClick;
         _contextMenu.Opening += OnContextMenuOpening;
         
-        // Initialize auto-snapshot timer
+        // Force tray icon to refresh (sometimes needed on Windows)
+        Task.Run(async () =>
+        {
+            await Task.Delay(500); // Small delay to ensure everything is initialized
+            this.Invoke(() =>
+            {
+                _trayIcon.Visible = false;
+                _trayIcon.Visible = true;
+                _ = Logger.InfoAsync("Tray icon refreshed");
+            });
+        });
+        
+        // Initialize auto-snapshot timer with validation
+        var intervalMinutes = Math.Max(_config.AutoSnapshotIntervalMinutes, 1); // Ensure at least 1 minute
+        var intervalMs = (int)TimeSpan.FromMinutes(intervalMinutes).TotalMilliseconds;
+        
         _autoSnapshotTimer = new System.Windows.Forms.Timer
         {
-            Interval = TimeSpan.FromMinutes(_config.AutoSnapshotIntervalMinutes).Milliseconds,
+            Interval = intervalMs,
             Enabled = true
         };
+        
+        _ = Logger.InfoAsync($"Auto-snapshot timer set to {intervalMinutes} minutes ({intervalMs} ms)");
         _autoSnapshotTimer.Tick += OnAutoSnapshotTimer;
         
         // Take initial snapshot
