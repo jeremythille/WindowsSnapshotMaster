@@ -1,6 +1,7 @@
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 
 namespace WindowsLayoutMaster;
@@ -11,22 +12,34 @@ namespace WindowsLayoutMaster;
 public partial class TrayIconForm : Form
 {
     private readonly NotifyIcon _trayIcon;
-    private readonly ContextMenuStrip _contextMenu;
+    private readonly TrayPopupForm _popup; // Replace ContextMenuStrip with custom popup
     private readonly System.Windows.Forms.Timer _autoSnapshotTimer;
     private readonly List<Snapshot> _snapshots = [];
     private readonly SemaphoreSlim _snapshotSemaphore = new(1, 1);
     private readonly AppConfig _config;
     private readonly string _snapshotsFilePath;
 
+    // Windows API constants for tray icon messages
+    private const int WM_USER = 0x0400;
+    private const int WM_TRAYICON = WM_USER + 1;
+    private const int WM_LBUTTONDOWN = 0x0201;
+    private const int WM_LBUTTONUP = 0x0202;
+    private const int WM_RBUTTONDOWN = 0x0204;
+    private const int WM_RBUTTONUP = 0x0205;
+
+    [DllImport("user32.dll")]
+    private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
     public TrayIconForm(AppConfig config)
     {
         _config = config;
         _snapshotsFilePath = Path.Combine(_config.SnapshotsDirectory, "snapshots.json");
         _ = Logger.InfoAsync($"Initializing TrayIconForm with AutoSnapshotIntervalMinutes: {config.AutoSnapshotIntervalMinutes}");
-        
-        InitializeComponent();
-        
-        // Configure form
+
+        // Initialize custom popup
+        _popup = new TrayPopupForm(OnMenuItemClick);
+
+        InitializeComponent();        // Configure form
         WindowState = FormWindowState.Minimized;
         ShowInTaskbar = false;
         Visible = false;
@@ -62,18 +75,9 @@ public partial class TrayIconForm : Form
         };
         
         _ = Logger.InfoAsync("Tray icon initialized and set to visible");
-        
-        // Initialize context menu
-        _contextMenu = new ContextMenuStrip();
-        _contextMenu.AutoClose = true; // Enable auto-close behavior
-        // Don't assign to trayIcon - we'll handle manually for full control
-        
-        // Configure events for manual menu handling
-        _trayIcon.MouseDown += OnTrayIconMouseDown;
-        _contextMenu.Opening += OnContextMenuOpening;
-        _contextMenu.Closed += OnContextMenuClosed;
-        
-        // Force tray icon to refresh (sometimes needed on Windows)
+
+        // Configure events for simple click handling
+        _trayIcon.MouseDown += OnTrayIconMouseDown;        // Force tray icon to refresh (sometimes needed on Windows)
         Task.Run(async () =>
         {
             await Task.Delay(500); // Small delay to ensure everything is initialized
@@ -107,33 +111,52 @@ public partial class TrayIconForm : Form
 
     private void OnTrayIconMouseDown(object? sender, MouseEventArgs e)
     {
-        // Handle left clicks by temporarily assigning the context menu and simulating right click behavior
-        if (e.Button == MouseButtons.Left)
+        // Handle both left and right clicks with our custom popup
+        if (e.Button == MouseButtons.Left || e.Button == MouseButtons.Right)
         {
-            // Temporarily assign the context menu to get proper behavior
-            _trayIcon.ContextMenuStrip = _contextMenu;
-            
-            // Use reflection to trigger the context menu showing logic
-            var methodInfo = typeof(NotifyIcon).GetMethod("ShowContextMenu", 
-                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-            methodInfo?.Invoke(_trayIcon, null);
-        }
-        else if (e.Button == MouseButtons.Right)
-        {
-            // For right clicks, also ensure context menu is assigned
-            _trayIcon.ContextMenuStrip = _contextMenu;
+            if (_popup.Visible)
+            {
+                _popup.Hide();
+            }
+            else
+            {
+                UpdatePopupMenu();
+                var cursorPos = Cursor.Position;
+                
+                // For tray icons, show the menu near the tray icon position
+                // Since tray is usually at bottom-right, we want to show above and slightly left
+                var menuLocation = new Point(cursorPos.X - 50, cursorPos.Y - 20);
+                _popup.ShowAt(menuLocation);
+            }
         }
     }
 
-    private void OnContextMenuOpening(object? sender, System.ComponentModel.CancelEventArgs e)
+    private void OnMenuItemClick(string action)
     {
-        UpdateContextMenu();
-    }
-
-    private void OnContextMenuClosed(object? sender, ToolStripDropDownClosedEventArgs e)
-    {
-        // Remove the context menu assignment to prevent conflicts with manual handling
-        _trayIcon.ContextMenuStrip = null;
+        switch (action)
+        {
+            case "take-snapshot":
+                _ = TakeSnapshotAsync(userInitiated: true);
+                break;
+            case "clear-all":
+                _snapshots.Clear();
+                _ = SaveSnapshotsAsync();
+                break;
+            case "exit":
+                Application.Exit();
+                break;
+            default:
+                if (action.StartsWith("restore-"))
+                {
+                    var indexStr = action.Substring("restore-".Length);
+                    if (int.TryParse(indexStr, out int index) && index >= 0 && index < _snapshots.Count)
+                    {
+                        var snapshot = _snapshots[index];
+                        _ = RestoreSnapshotAsync(snapshot);
+                    }
+                }
+                break;
+        }
     }
 
     private async void OnAutoSnapshotTimer(object? sender, EventArgs e)
@@ -228,9 +251,9 @@ public partial class TrayIconForm : Form
         }
     }
 
-    private void UpdateContextMenu()
+    private void UpdatePopupMenu()
     {
-        _contextMenu.Items.Clear();
+        _popup.ClearItems();
         
         // Snapshot history
         var condensedSnapshots = CondenseSnapshots(_snapshots, _config.MaxSnapshotsToKeep);
@@ -238,51 +261,25 @@ public partial class TrayIconForm : Form
             ? condensedSnapshots.SelectMany(s => s.Monitors).Max(m => m.PixelCount)
             : 0;
         
-        foreach (var snapshot in condensedSnapshots.OrderByDescending(s => s.TimeTaken))
+        for (int i = 0; i < condensedSnapshots.Count; i++)
         {
-            var item = new MonitorAwareToolStripMenuItem(snapshot.Description, snapshot.Monitors, maxPixels)
-            {
-                Tag = snapshot,
-                Font = snapshot.UserInitiated 
-                    ? new Font(_contextMenu.Font, FontStyle.Bold) 
-                    : _contextMenu.Font
-            };
-            
-            item.Click += async (s, e) => await RestoreSnapshotAsync(snapshot);
-            
-            _contextMenu.Items.Add(item);
+            var snapshot = condensedSnapshots.OrderByDescending(s => s.TimeTaken).ToList()[i];
+            _popup.AddMenuItem(snapshot.Description, $"restore-{_snapshots.IndexOf(snapshot)}", snapshot.Monitors, maxPixels);
         }
         
         // Additional options
         if (_snapshots.Count > 0)
         {
-            _contextMenu.Items.Add(new ToolStripSeparator());
-            
-            var clearItem = new ToolStripMenuItem("Clear All Snapshots");
-            clearItem.Click += async (s, e) => 
-            {
-                _snapshots.Clear();
-                await SaveSnapshotsAsync();
-            };
-            _contextMenu.Items.Add(clearItem);
+            _popup.AddSeparator();
+            _popup.AddMenuItem("Clear All Snapshots", "clear-all");
         }
         
-        _contextMenu.Items.Add(new ToolStripSeparator());
+        _popup.AddSeparator();
+        _popup.AddMenuItem("Take Snapshot", "take-snapshot");
+        _popup.AddSeparator();
+        _popup.AddMenuItem("Exit", "exit");
         
-        // Manual snapshot option - moved to bottom for better UX
-        var takeSnapshotItem = new ToolStripMenuItem("Take Snapshot Now")
-        {
-            Font = new Font(_contextMenu.Font, FontStyle.Bold)
-        };
-        takeSnapshotItem.Click += async (s, e) => await TakeSnapshotAsync(userInitiated: true);
-        _contextMenu.Items.Add(takeSnapshotItem);
-        
-        _contextMenu.Items.Add(new ToolStripSeparator());
-        
-        // Exit option
-        var exitItem = new ToolStripMenuItem("Exit");
-        exitItem.Click += (s, e) => Application.Exit();
-        _contextMenu.Items.Add(exitItem);
+        _popup.BuildMenu();
     }
 
     private async Task RestoreSnapshotAsync(Snapshot snapshot)
@@ -352,7 +349,7 @@ public partial class TrayIconForm : Form
         if (disposing)
         {
             _trayIcon?.Dispose();
-            _contextMenu?.Dispose();
+            _popup?.Dispose();
             _autoSnapshotTimer?.Dispose();
             _snapshotSemaphore?.Dispose();
         }

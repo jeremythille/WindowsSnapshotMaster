@@ -104,12 +104,11 @@ public class Snapshot
 
     private string GenerateDescription()
     {
-        var timeString = TimeTaken.ToLocalTime().ToString("MMM dd, h:mm tt");
+        var timeString = TimeTaken.ToLocalTime().ToString("MMM dd, HH:mm"); // 24h format, no AM/PM
         var windowCount = Windows.Count;
-        var monitorCount = Monitors.Count;
         
         var suffix = UserInitiated ? " (Manual)" : "";
-        return $"{timeString} - {windowCount} windows, {monitorCount} monitor{(monitorCount != 1 ? "s" : "")}{suffix}";
+        return $"{timeString} - {windowCount} windows{suffix}"; // Remove monitor count since icons show this
     }
 }
 
