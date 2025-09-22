@@ -13,3 +13,4 @@ D:\dev\WindowsLayoutSnapshot\source\obj\Debug\refint\WindowsLayoutMaster.dll
 D:\dev\WindowsLayoutSnapshot\source\obj\Debug\WindowsLayoutMaster.pdb
 D:\dev\WindowsLayoutSnapshot\source\obj\Debug\WindowsLayoutMaster.genruntimeconfig.cache
 D:\dev\WindowsLayoutSnapshot\source\obj\Debug\ref\WindowsLayoutMaster.dll
+D:\dev\WindowsLayoutSnapshot\source\obj\Debug\WindowsLayoutMaster.sourcelink.json
