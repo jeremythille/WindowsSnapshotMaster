@@ -1,14 +1,17 @@
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 
-namespace WindowsLayoutSnapshot;
+namespace WindowsLayoutMaster;
 
 /// <summary>
 /// Represents a window with its position, size, and state information
 /// </summary>
 public record WindowInfo
 {
-    public required IntPtr Handle { get; init; }
+    [JsonIgnore]
+    public IntPtr Handle { get; init; }
+    
     public required string Title { get; init; }
     public required Rectangle Bounds { get; init; }
     public required WindowState State { get; init; }
@@ -54,6 +57,9 @@ public static class WindowManager
     
     [DllImport("user32.dll")]
     private static extern IntPtr GetLastActivePopup(IntPtr hWnd);
+    
+    [DllImport("user32.dll")]
+    private static extern bool IsIconic(IntPtr hWnd);
 
     private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
     
@@ -139,8 +145,15 @@ public static class WindowManager
     /// </summary>
     public static bool RestoreWindow(WindowInfo windowInfo)
     {
-        if (!IsWindowVisible(windowInfo.Handle))
-            return false;
+        IntPtr targetHandle = windowInfo.Handle;
+        
+        // If handle is null/invalid (e.g., loaded from JSON), try to find by title
+        if (targetHandle == IntPtr.Zero || !IsWindowVisible(targetHandle))
+        {
+            targetHandle = FindWindowByTitle(windowInfo.Title);
+            if (targetHandle == IntPtr.Zero)
+                return false;
+        }
 
         var placement = new WINDOWPLACEMENT
         {
@@ -149,7 +162,31 @@ public static class WindowManager
             rcNormalPosition = RECT.FromRectangle(EnsureWindowFitsScreen(windowInfo.Bounds))
         };
 
-        return SetWindowPlacement(windowInfo.Handle, ref placement);
+        return SetWindowPlacement(targetHandle, ref placement);
+    }
+
+    /// <summary>
+    /// Finds a window by its title
+    /// </summary>
+    private static IntPtr FindWindowByTitle(string title)
+    {
+        var foundHandle = IntPtr.Zero;
+        
+        EnumWindows((hWnd, lParam) =>
+        {
+            if (IsWindowVisible(hWnd) && !IsIconic(hWnd))
+            {
+                var windowTitle = GetWindowTitle(hWnd);
+                if (windowTitle == title)
+                {
+                    foundHandle = hWnd;
+                    return false; // Stop enumeration
+                }
+            }
+            return true; // Continue enumeration
+        }, IntPtr.Zero);
+        
+        return foundHandle;
     }
 
     private static string GetWindowTitle(IntPtr hWnd)

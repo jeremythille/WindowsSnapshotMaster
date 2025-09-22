@@ -1,6 +1,7 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
-namespace WindowsLayoutSnapshot;
+namespace WindowsLayoutMaster;
 
 /// <summary>
 /// Represents a snapshot of window layouts at a specific point in time
@@ -12,8 +13,11 @@ public class Snapshot
     public bool UserInitiated { get; init; }
     public List<WindowInfo> Windows { get; init; } = [];
     public List<MonitorInfo> Monitors { get; init; } = [];
+    
+    [JsonIgnore]
     public string Description => GenerateDescription();
 
+    [JsonIgnore]
     public TimeSpan Age => DateTime.UtcNow - TimeTaken;
 
     /// <summary>
@@ -120,6 +124,8 @@ public record MonitorInfo
     public required bool Primary { get; init; }
     public required string DeviceName { get; init; }
     
+    [JsonIgnore]
     public long PixelCount => (long)Bounds.Width * Bounds.Height;
+    
     public float RelativeSize(long maxPixels) => maxPixels > 0 ? (float)Math.Sqrt((double)PixelCount / maxPixels) : 1.0f;
 }

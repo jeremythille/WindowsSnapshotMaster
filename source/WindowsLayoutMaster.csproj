@@ -4,15 +4,18 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <ApplicationIcon>monitor-window-3d-shadow.ico</ApplicationIcon>
-    <AssemblyName>WindowsLayoutSnapshot</AssemblyName>
-    <RootNamespace>WindowsLayoutSnapshot</RootNamespace>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <AssemblyName>WindowsLayoutMaster</AssemblyName>
+    <RootNamespace>WindowsLayoutMaster</RootNamespace>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Build directly to program folder -->
+    <OutputPath>..\program\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="monitor-window-3d-shadow.ico">
+    <Content Include="icon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <EmbeddedResource Include="Resources\glyphicons_086_display.png" />

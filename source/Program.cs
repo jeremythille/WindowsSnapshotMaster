@@ -1,13 +1,13 @@
-using WindowsLayoutSnapshot;
+using WindowsLayoutMaster;
 
 try
 {
     // Ensure only one instance of the application is running
-    using var mutex = new Mutex(true, "WindowsLayoutSnapshot_SingleInstance", out bool isNewInstance);
+    using var mutex = new Mutex(true, "WindowsLayoutMaster_SingleInstance", out bool isNewInstance);
     
     if (!isNewInstance)
     {
-        MessageBox.Show("Windows Layout Snapshot is already running. Check your system tray.", 
+        MessageBox.Show("Windows Layout Master is already running. Check your system tray.", 
             "Already Running", MessageBoxButtons.OK, MessageBoxIcon.Information);
         return;
     }
@@ -33,7 +33,7 @@ try
 catch (Exception ex)
 {
     await Logger.ErrorAsync("Fatal error during application startup", ex);
-    MessageBox.Show($"A fatal error occurred: {ex.Message}", "Windows Layout Snapshot", 
+    MessageBox.Show($"A fatal error occurred: {ex.Message}", "Windows Layout Master", 
         MessageBoxButtons.OK, MessageBoxIcon.Error);
 }
 

@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace WindowsLayoutSnapshot;
+namespace WindowsLayoutMaster;
 
 /// <summary>
 /// Application configuration settings
@@ -14,11 +14,11 @@ public class AppConfig
     public bool SaveSnapshotsToDisk { get; set; } = false;
     public string SnapshotsDirectory { get; set; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "WindowsLayoutSnapshot");
+        "WindowsLayoutMaster");
 
     private static readonly string ConfigPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "WindowsLayoutSnapshot",
+        "WindowsLayoutMaster",
         "config.json");
 
     /// <summary>
@@ -79,7 +79,7 @@ public static class Logger
 {
     private static readonly string LogPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "WindowsLayoutSnapshot",
+        "WindowsLayoutMaster",
         "app.log");
 
     public static async Task LogAsync(string level, string message, Exception? exception = null)
