@@ -14,6 +14,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = WindowsLayoutMaster
-build_property.ProjectDir = D:\dev\WindowsLayoutSnapshot\source\
+build_property.ProjectDir = C:\dev\WindowsSnapshotMaster\source\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

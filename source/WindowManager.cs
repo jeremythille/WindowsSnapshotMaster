@@ -64,6 +64,28 @@ public static class WindowManager
     [DllImport("user32.dll")]
     private static extern int GetWindowTextLength(IntPtr hWnd);
 
+    [DllImport("user32.dll")]
+    private static extern bool InvalidateRect(IntPtr hWnd, IntPtr lpRect, bool bErase);
+    
+    [DllImport("user32.dll")]
+    private static extern bool UpdateWindow(IntPtr hWnd);
+    
+    [DllImport("user32.dll")]
+    private static extern bool RedrawWindow(IntPtr hWnd, IntPtr lprcUpdate, IntPtr hrgnUpdate, uint flags);
+    
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
+
+    // RedrawWindow flags
+    private const uint RDW_INVALIDATE = 0x0001;
+    private const uint RDW_UPDATENOW = 0x0100;
+    private const uint RDW_ALLCHILDREN = 0x0080;
+    
+    // SetWindowPos flags
+    private const uint SWP_NOZORDER = 0x0004;
+    private const uint SWP_NOACTIVATE = 0x0010;
+    private const uint SWP_FRAMECHANGED = 0x0020;
+
     // Public wrappers for TrayIconForm
     public static bool IsWindowIconic(IntPtr hWnd) => IsIconic(hWnd);
     public static int GetWindowTitleLength(IntPtr hWnd) => GetWindowTextLength(hWnd);
@@ -163,14 +185,90 @@ public static class WindowManager
                 return false;
         }
 
-        var placement = new WINDOWPLACEMENT
+        try
         {
-            length = Marshal.SizeOf(typeof(WINDOWPLACEMENT)),
-            showCmd = (int)windowInfo.State,
-            rcNormalPosition = RECT.FromRectangle(EnsureWindowFitsScreen(windowInfo.Bounds))
-        };
+            var adjustedBounds = EnsureWindowFitsScreen(windowInfo.Bounds);
+            
+            // Method 1: Try using SetWindowPlacement (preferred for state management)
+            var placement = new WINDOWPLACEMENT
+            {
+                length = Marshal.SizeOf(typeof(WINDOWPLACEMENT)),
+                showCmd = (int)windowInfo.State,
+                rcNormalPosition = RECT.FromRectangle(adjustedBounds)
+            };
 
-        return SetWindowPlacement(targetHandle, ref placement);
+            bool success = SetWindowPlacement(targetHandle, ref placement);
+            
+            if (success)
+            {
+                // Force a complete window refresh to fix content displacement issues
+                RefreshWindowContent(targetHandle, adjustedBounds);
+            }
+            
+            return success;
+        }
+        catch (Exception)
+        {
+            // If SetWindowPlacement fails, try alternative method
+            return RestoreWindowAlternative(targetHandle, windowInfo);
+        }
+    }
+
+    /// <summary>
+    /// Alternative window restoration method using SetWindowPos
+    /// </summary>
+    private static bool RestoreWindowAlternative(IntPtr hWnd, WindowInfo windowInfo)
+    {
+        try
+        {
+            var adjustedBounds = EnsureWindowFitsScreen(windowInfo.Bounds);
+            
+            // Use SetWindowPos which can be more reliable for positioning
+            bool success = SetWindowPos(
+                hWnd,
+                IntPtr.Zero, // Don't change Z-order
+                adjustedBounds.X,
+                adjustedBounds.Y,
+                adjustedBounds.Width,
+                adjustedBounds.Height,
+                SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED
+            );
+            
+            if (success)
+            {
+                RefreshWindowContent(hWnd, adjustedBounds);
+            }
+            
+            return success;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Forces a complete refresh of window content to fix display issues
+    /// </summary>
+    private static void RefreshWindowContent(IntPtr hWnd, Rectangle bounds)
+    {
+        try
+        {
+            // Method 1: Invalidate and update the window
+            InvalidateRect(hWnd, IntPtr.Zero, true);
+            UpdateWindow(hWnd);
+            
+            // Method 2: Use RedrawWindow for more thorough refresh
+            RedrawWindow(hWnd, IntPtr.Zero, IntPtr.Zero, 
+                RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
+            
+            // Small delay to allow the window to process the refresh
+            System.Threading.Thread.Sleep(10);
+        }
+        catch
+        {
+            // Ignore refresh errors - the window should still be positioned correctly
+        }
     }
 
     /// <summary>

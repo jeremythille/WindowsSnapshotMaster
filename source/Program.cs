@@ -15,7 +15,8 @@ try
     // Configure application
     Application.EnableVisualStyles();
     Application.SetCompatibleTextRenderingDefault(false);
-    Application.SetHighDpiMode(HighDpiMode.SystemAware);
+    // Changed from SystemAware to PerMonitorV2 to better handle DPI scaling
+    Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
     
     // Set up unhandled exception handling
     Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);

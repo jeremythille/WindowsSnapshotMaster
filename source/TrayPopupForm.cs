@@ -12,6 +12,7 @@ public partial class TrayPopupForm : Form
     private Snapshot? _originalSnapshot; // Store original layout for preview restoration
     private readonly Action<Snapshot?> _onPreviewSnapshot; // Callback for preview
     private readonly Func<int, Snapshot?> _getSnapshotByIndex; // Callback to get snapshot by index
+    private bool _isClickInProgress; // Flag to prevent MouseLeave from interfering with clicks
 
     public TrayPopupForm(Action<string> onMenuItemClick, Action<Snapshot?> onPreviewSnapshot, Func<int, Snapshot?> getSnapshotByIndex)
     {
@@ -34,14 +35,22 @@ public partial class TrayPopupForm : Form
         // Handle deactivation to close popup and restore original layout
         Deactivate += (s, e) => 
         {
-            RestoreOriginalLayout();
+            // Only restore original layout if we're not in the middle of processing a click
+            if (!_isClickInProgress)
+            {
+                RestoreOriginalLayout();
+            }
             Hide();
         };
         
         // Handle click outside to close popup and restore original layout
         LostFocus += (s, e) => 
         {
-            RestoreOriginalLayout();
+            // Only restore original layout if we're not in the middle of processing a click
+            if (!_isClickInProgress)
+            {
+                RestoreOriginalLayout();
+            }
             Hide();
         };
     }
@@ -52,6 +61,14 @@ public partial class TrayPopupForm : Form
         {
             _onPreviewSnapshot(null); // Signal to restore original layout
         }
+    }
+
+    /// <summary>
+    /// Manually reset the click state (useful for cleanup)
+    /// </summary>
+    public void ResetClickState()
+    {
+        _isClickInProgress = false;
     }
 
     public void ClearItems()
@@ -155,15 +172,42 @@ public partial class TrayPopupForm : Form
                     menuItem.BackColor = SystemColors.Menu;
                     menuItem.ForeColor = SystemColors.MenuText;
                     
-                    // Restore original layout when not hovering over any snapshot
-                    RestoreOriginalLayout();
+                    // Only restore original layout when not clicking (to prevent click interference)
+                    if (!_isClickInProgress)
+                    {
+                        RestoreOriginalLayout();
+                    }
                 };
                 
                 // Handle click
                 menuItem.Click += (s, e) =>
                 {
+                    _isClickInProgress = true; // Prevent MouseLeave from interfering
+                    
+                    // Store the action to execute after hiding
+                    var actionToExecute = item.action;
+                    
+                    // Hide the form first
                     Hide();
-                    _onMenuItemClick(item.action);
+                    
+                    // Use a small delay to ensure the form is hidden and events have settled
+                    // before executing the action and resetting the flag
+                    Task.Run(async () =>
+                    {
+                        await Task.Delay(50); // Small delay to let events settle
+                        
+                        // Execute the action on the UI thread
+                        Invoke(() =>
+                        {
+                            _onMenuItemClick(actionToExecute);
+                            // Reset flag after a longer delay to prevent interference from late events
+                            Task.Run(async () =>
+                            {
+                                await Task.Delay(200);
+                                _isClickInProgress = false;
+                            });
+                        });
+                    });
                 };
                 
                 Controls.Add(menuItem);

@@ -8,23 +8,26 @@
     "net8.0-windows7.0": []
   },
   "packageFolders": {
-    "C:\\Users\\Administrateur\\.nuget\\packages\\": {}
+    "C:\\Users\\Jer\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\dev\\WindowsLayoutSnapshot\\source\\WindowsLayoutMaster.csproj",
+      "projectUniqueName": "C:\\dev\\WindowsSnapshotMaster\\source\\WindowsLayoutMaster.csproj",
       "projectName": "WindowsLayoutMaster",
-      "projectPath": "D:\\dev\\WindowsLayoutSnapshot\\source\\WindowsLayoutMaster.csproj",
-      "packagesPath": "C:\\Users\\Administrateur\\.nuget\\packages\\",
-      "outputPath": "D:\\dev\\WindowsLayoutSnapshot\\source\\obj\\",
+      "projectPath": "C:\\dev\\WindowsSnapshotMaster\\source\\WindowsLayoutMaster.csproj",
+      "packagesPath": "C:\\Users\\Jer\\.nuget\\packages\\",
+      "outputPath": "C:\\dev\\WindowsSnapshotMaster\\source\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Administrateur\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Jer\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0-windows"
       ],
+      "sources": {
+        "https://api.nuget.org/v3/index.json": {}
+      },
       "frameworks": {
         "net8.0-windows7.0": {
           "targetAlias": "net8.0-windows",
