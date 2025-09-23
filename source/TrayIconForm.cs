@@ -45,7 +45,7 @@ public partial class TrayIconForm : Form
         Visible = false;
         
         // Initialize tray icon
-        var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico");
+        var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "icon.ico");
         Icon? trayIconIcon = null;
         
         try

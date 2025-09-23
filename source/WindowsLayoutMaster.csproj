@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
     <AssemblyName>WindowsLayoutMaster</AssemblyName>
     <RootNamespace>WindowsLayoutMaster</RootNamespace>
     <Nullable>enable</Nullable>
@@ -15,10 +15,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="icon.ico">
+    <Content Include="Resources\icon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="Resources\glyphicons_086_display.png" />
   </ItemGroup>
 
   <!-- Post-build task to create portable launcher -->
