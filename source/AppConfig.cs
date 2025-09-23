@@ -12,9 +12,7 @@ public class AppConfig
     public bool StartWithWindows { get; set; } = true;
     public bool EnableSounds { get; set; } = false;
     public bool SaveSnapshotsToDisk { get; set; } = false;
-    public string SnapshotsDirectory { get; set; } = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "WindowsLayoutMaster");
+    public string SnapshotsDirectory { get; set; } = AppDomain.CurrentDomain.BaseDirectory;
 
     private static readonly string ConfigPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),

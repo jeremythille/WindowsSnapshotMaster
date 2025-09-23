@@ -21,4 +21,11 @@
     <EmbeddedResource Include="Resources\glyphicons_086_display.png" />
   </ItemGroup>
 
+  <!-- Post-build task to create portable launcher -->
+  <Target Name="CreateLauncher" AfterTargets="Build">
+    <!-- Create a portable batch file launcher -->
+    <Exec Command="echo @echo off > &quot;$(ProjectDir)..\WindowsLayoutMaster.cmd&quot;" />
+    <Exec Command="echo start &quot;&quot; &quot;%%~dp0program\WindowsLayoutMaster.exe&quot; >> &quot;$(ProjectDir)..\WindowsLayoutMaster.cmd&quot;" />
+  </Target>
+
 </Project>

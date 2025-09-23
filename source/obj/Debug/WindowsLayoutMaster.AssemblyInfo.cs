@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WindowsLayoutMaster")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+677326f339a348a3561c7be6fda1d8e695e2f75b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+60cd6a279dfe207af2350e0935477af68b2ec861")]
 [assembly: System.Reflection.AssemblyProductAttribute("WindowsLayoutMaster")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WindowsLayoutMaster")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
