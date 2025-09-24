@@ -252,10 +252,20 @@ public partial class TrayIconForm : Form
             var snapshot = await Snapshot.TakeSnapshotAsync(userInitiated);
             _snapshots.Add(snapshot);
             
-            // Keep only the most recent snapshots
+            // Smart snapshot management: preserve manual snapshots
             while (_snapshots.Count > _config.MaxSnapshotsToKeep)
             {
-                _snapshots.RemoveAt(0);
+                // Find the oldest snapshot to remove, preferring automatic ones
+                var snapshotToRemove = FindSnapshotToRemove(_snapshots);
+                if (snapshotToRemove != null)
+                {
+                    _snapshots.Remove(snapshotToRemove);
+                }
+                else
+                {
+                    // Fallback: remove oldest if we can't find a good candidate
+                    _snapshots.RemoveAt(0);
+                }
             }
             
             // Save snapshots to disk
@@ -414,6 +424,43 @@ public partial class TrayIconForm : Form
         }
         
         return result.OrderBy(s => s.TimeTaken).ToList();
+    }
+
+    private Snapshot? FindSnapshotToRemove(List<Snapshot> snapshots)
+    {
+        const int minManualSnapshots = 4; // Always keep at least 4 manual snapshots
+        
+        // Count manual snapshots
+        var manualSnapshots = snapshots.Where(s => s.UserInitiated).ToList();
+        
+        // If we have more than the minimum manual snapshots, we can remove automatic ones freely
+        // Otherwise, only remove automatic snapshots or the oldest manual if we must
+        
+        if (manualSnapshots.Count <= minManualSnapshots)
+        {
+            // We have few manual snapshots, only remove automatic ones
+            var automaticSnapshots = snapshots.Where(s => !s.UserInitiated).OrderBy(s => s.TimeTaken).ToList();
+            return automaticSnapshots.FirstOrDefault();
+        }
+        else
+        {
+            // We have enough manual snapshots, prefer removing automatic ones, but can remove old manual ones too
+            var automaticSnapshots = snapshots.Where(s => !s.UserInitiated).OrderBy(s => s.TimeTaken).ToList();
+            if (automaticSnapshots.Any())
+            {
+                return automaticSnapshots.First();
+            }
+            
+            // No automatic snapshots to remove, remove oldest manual snapshot beyond the minimum
+            var sortedManualSnapshots = manualSnapshots.OrderBy(s => s.TimeTaken).ToList();
+            // Keep the most recent minManualSnapshots, remove from the oldest
+            if (sortedManualSnapshots.Count > minManualSnapshots)
+            {
+                return sortedManualSnapshots.First();
+            }
+        }
+        
+        return null; // Should not happen, but fallback
     }
 
     protected override void SetVisibleCore(bool value)
