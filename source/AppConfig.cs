@@ -90,14 +90,28 @@ public static class Logger
                 Directory.CreateDirectory(directory);
             }
 
+            // Limit log file size to 10KB (10240 bytes)
+            const int maxLogSize = 10 * 1024;
+            if (File.Exists(LogPath))
+            {
+                var fileInfo = new FileInfo(LogPath);
+                if (fileInfo.Length > maxLogSize)
+                {
+                    // Truncate the file by keeping only the last 5KB
+                    var allBytes = await File.ReadAllBytesAsync(LogPath);
+                    var keepBytes = allBytes.Length > 5 * 1024 ? allBytes[^(5 * 1024)..] : allBytes;
+                    await File.WriteAllBytesAsync(LogPath, keepBytes);
+                }
+            }
+
             var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             var logEntry = $"[{timestamp}] [{level}] {message}";
-            
+
             if (exception != null)
             {
                 logEntry += $"\n{exception}";
             }
-            
+
             logEntry += "\n";
 
             await File.AppendAllTextAsync(LogPath, logEntry);
