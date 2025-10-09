@@ -298,7 +298,9 @@ public class MonitorAwareLabel : Label
         {
             try
             {
-                var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "monitor.png");
+                // Look for monitor.png in the output Resources directory
+                var exeDir = AppDomain.CurrentDomain.BaseDirectory;
+                var iconPath = Path.Combine(exeDir, "Resources", "monitor.png");
                 if (File.Exists(iconPath))
                 {
                     _monitorIcon = Image.FromFile(iconPath);
