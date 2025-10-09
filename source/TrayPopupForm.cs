@@ -291,33 +291,86 @@ public class MonitorAwareLabel : Label
         _maxPixels = maxPixels;
     }
 
+    private static Image? _monitorIcon;
+    private static void EnsureMonitorIconLoaded()
+    {
+        if (_monitorIcon == null)
+        {
+            try
+            {
+                var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "monitor.png");
+                if (File.Exists(iconPath))
+                {
+                    _monitorIcon = Image.FromFile(iconPath);
+                }
+            }
+            catch { /* ignore */ }
+        }
+    }
+
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
 
-        if (_monitors.Count <= 1) return;
-
-        // Load monitor icon (we'll create a simple rectangle for now since we don't have the original icon)
+        EnsureMonitorIconLoaded();
+        var icon = _monitorIcon;
         var iconSize = 16;
-        var margin = 8; // Normal margin with wider menu providing space
+        var margin = 8;
         var currentX = Width - margin;
 
-        using var brush = new SolidBrush(Color.FromArgb(128, ForeColor));
-        
-        foreach (var monitor in _monitors.OrderByDescending(m => m.Primary))
+        if (icon != null)
         {
-            var relativeSize = monitor.RelativeSize(_maxPixels);
-            var scaledSize = (int)(iconSize * relativeSize);
-            var rect = new Rectangle(
-                currentX - scaledSize, 
-                (Height - scaledSize) / 2, 
-                scaledSize, 
-                scaledSize);
-
-            e.Graphics.FillRectangle(brush, rect);
-            e.Graphics.DrawRectangle(Pens.Gray, rect);
-
-            currentX -= scaledSize + 2;
+            // Draw one icon per monitor (or just one if only one monitor)
+            foreach (var monitor in _monitors.OrderByDescending(m => m.Primary))
+            {
+                var relativeSize = monitor.RelativeSize(_maxPixels);
+                var scaledSize = (int)(iconSize * relativeSize);
+                var rect = new Rectangle(
+                    currentX - scaledSize,
+                    (Height - scaledSize) / 2,
+                    scaledSize,
+                    scaledSize);
+                e.Graphics.DrawImage(icon, rect);
+                currentX -= scaledSize + 2;
+            }
+            // If only one monitor, still draw one icon
+            if (_monitors.Count == 1)
+            {
+                var rect = new Rectangle(
+                    currentX - iconSize,
+                    (Height - iconSize) / 2,
+                    iconSize,
+                    iconSize);
+                e.Graphics.DrawImage(icon, rect);
+            }
+        }
+        else
+        {
+            // Fallback: draw a gray rectangle if icon not found
+            using var brush = new SolidBrush(Color.FromArgb(128, ForeColor));
+            foreach (var monitor in _monitors.OrderByDescending(m => m.Primary))
+            {
+                var relativeSize = monitor.RelativeSize(_maxPixels);
+                var scaledSize = (int)(iconSize * relativeSize);
+                var rect = new Rectangle(
+                    currentX - scaledSize,
+                    (Height - scaledSize) / 2,
+                    scaledSize,
+                    scaledSize);
+                e.Graphics.FillRectangle(brush, rect);
+                e.Graphics.DrawRectangle(Pens.Gray, rect);
+                currentX -= scaledSize + 2;
+            }
+            if (_monitors.Count == 1)
+            {
+                var rect = new Rectangle(
+                    currentX - iconSize,
+                    (Height - iconSize) / 2,
+                    iconSize,
+                    iconSize);
+                e.Graphics.FillRectangle(brush, rect);
+                e.Graphics.DrawRectangle(Pens.Gray, rect);
+            }
         }
     }
 }
