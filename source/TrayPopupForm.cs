@@ -322,47 +322,36 @@ public class MonitorAwareLabel : Label
 
         if (icon != null)
         {
-            // Draw one icon per monitor (or just one if only one monitor)
-            foreach (var monitor in _monitors.OrderByDescending(m => m.Primary))
-            {
-                var relativeSize = monitor.RelativeSize(_maxPixels);
-                var scaledSize = (int)(iconSize * relativeSize);
-                var rect = new Rectangle(
-                    currentX - scaledSize,
-                    (Height - scaledSize) / 2,
-                    scaledSize,
-                    scaledSize);
-                e.Graphics.DrawImage(icon, rect);
-                currentX -= scaledSize + 2;
-            }
-            // If only one monitor, still draw one icon
             if (_monitors.Count == 1)
             {
+                // Only one monitor: draw one icon
                 var rect = new Rectangle(
                     currentX - iconSize,
                     (Height - iconSize) / 2,
                     iconSize,
                     iconSize);
                 e.Graphics.DrawImage(icon, rect);
+            }
+            else
+            {
+                // Multiple monitors: draw one icon per monitor
+                foreach (var monitor in _monitors.OrderByDescending(m => m.Primary))
+                {
+                    var relativeSize = monitor.RelativeSize(_maxPixels);
+                    var scaledSize = (int)(iconSize * relativeSize);
+                    var rect = new Rectangle(
+                        currentX - scaledSize,
+                        (Height - scaledSize) / 2,
+                        scaledSize,
+                        scaledSize);
+                    e.Graphics.DrawImage(icon, rect);
+                    currentX -= scaledSize + 2;
+                }
             }
         }
         else
         {
-            // Fallback: draw a gray rectangle if icon not found
             using var brush = new SolidBrush(Color.FromArgb(128, ForeColor));
-            foreach (var monitor in _monitors.OrderByDescending(m => m.Primary))
-            {
-                var relativeSize = monitor.RelativeSize(_maxPixels);
-                var scaledSize = (int)(iconSize * relativeSize);
-                var rect = new Rectangle(
-                    currentX - scaledSize,
-                    (Height - scaledSize) / 2,
-                    scaledSize,
-                    scaledSize);
-                e.Graphics.FillRectangle(brush, rect);
-                e.Graphics.DrawRectangle(Pens.Gray, rect);
-                currentX -= scaledSize + 2;
-            }
             if (_monitors.Count == 1)
             {
                 var rect = new Rectangle(
@@ -372,6 +361,22 @@ public class MonitorAwareLabel : Label
                     iconSize);
                 e.Graphics.FillRectangle(brush, rect);
                 e.Graphics.DrawRectangle(Pens.Gray, rect);
+            }
+            else
+            {
+                foreach (var monitor in _monitors.OrderByDescending(m => m.Primary))
+                {
+                    var relativeSize = monitor.RelativeSize(_maxPixels);
+                    var scaledSize = (int)(iconSize * relativeSize);
+                    var rect = new Rectangle(
+                        currentX - scaledSize,
+                        (Height - scaledSize) / 2,
+                        scaledSize,
+                        scaledSize);
+                    e.Graphics.FillRectangle(brush, rect);
+                    e.Graphics.DrawRectangle(Pens.Gray, rect);
+                    currentX -= scaledSize + 2;
+                }
             }
         }
     }
