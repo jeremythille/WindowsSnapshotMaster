@@ -29,7 +29,15 @@ public class Snapshot
         {
             var windows = WindowManager.GetAllWindows();
             var monitors = GetCurrentMonitors();
-            
+
+            // Debug log: record detected monitors
+            try
+            {
+                var monitorInfo = string.Join(" | ", monitors.Select(m => $"{m.DeviceName}: {m.Bounds.Width}x{m.Bounds.Height} @ {m.Bounds.X},{m.Bounds.Y} Primary={m.Primary}"));
+                Logger.InfoAsync($"[Snapshot] Detected monitors: {monitorInfo}");
+            }
+            catch { /* ignore logging errors */ }
+
             return new Snapshot
             {
                 TimeTaken = DateTime.UtcNow,
