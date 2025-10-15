@@ -1,22 +1,34 @@
+Simple utility that:
 
-Ever switch monitor configs on your laptop and all of your windows are squished down in size and in the wrong position? Ever want to minimize all windows but save their layouts and min-max'ed states for later?
+- Memorizes all your programs locations and sizes
+- Allows to restore them if they have moved
+
+## Features
 
 WindowsLayoutMaster is a modern .NET 8 Windows system tray utility that remembers and restores window positions, with persistent storage.
 
+- **Persistent Storage**: Snapshots are saved to disk (in a JSON file) and survive app restarts
+- **System Tray Interface**: Runs quietly in the background with left-click menu access
+- **Automatic Snapshots**: Takes snapshots every 30 minutes automatically
+- **Manual Snapshots**: Take snapshots on-demand via the tray menu
+- **Preview on Hover**: Preview layouts by hovering over snapshot menu items
+- **Single Instance**: Prevents multiple instances from running simultaneously
+- **Multi-Monitor Support**: Full support for complex multi-monitor setups, as well as virtual desktops
+
 ## Usage
 
-1. Run `WindowsLayoutMaster.cmd` (or `./program/WindowsLayoutMaster.exe`) - it will appear in your system tray
+1. Run `WindowsLayoutMaster.cmd` (or `./program/WindowsLayoutMaster.exe`) - it will then appear in your system tray.
+There's no installer; just run `WindowsLayoutMaster.cmd` or put it in your Startup folder to have it start automatically.
+
+	### Note: 
+	Windows might ask you to install the Microsoft .NET 8.0 Runtime, please accept, as it is required by the program to run.
+
 2. Click the tray icon to access the menu
 3. Use "Take Snapshot" to manually save your current window layout
 4. Hover over any snapshot in the menu to preview/restore it
 5. Snapshots are automatically saved every 30 minutes
 
 
-## Running
-
-To run WindowsLayoutMaster, simply double-click the `WindowsLayoutMaster.cmd` shortcut in the root folder. This launches the executable located in the `program/` folder and the app will appear in your system tray.
-
-There's no installer; just run `WindowsLayoutMaster.cmd` or put it in your Startup folder to have it start automatically.
 
 ## Project Structure
 
@@ -35,23 +47,6 @@ dotnet build WindowsLayoutMaster.csproj
 
 The build automatically outputs to the `program/` folder for immediate use.
 
-## Distribution
-
-The final executable is located in the `program/` folder:
-- `WindowsLayoutMaster.exe` - Main executable (use the batch file in root folder)
-- `WindowsLayoutMaster.dll` - Application assembly  
-- `WindowsLayoutMaster.runtimeconfig.json` - Runtime configuration
-
-
-## Features
-
-- **Persistent Storage**: Snapshots are saved to disk and survive app restarts
-- **System Tray Interface**: Runs quietly in the background with right-click menu access
-- **Automatic Snapshots**: Takes snapshots every 30 minutes automatically
-- **Manual Snapshots**: Take snapshots on-demand via the tray menu
-- **Preview on Hover**: Preview layouts by hovering over snapshot menu items
-- **Single Instance**: Prevents multiple instances from running simultaneously
-- **Multi-Monitor Support**: Full support for complex multi-monitor setups, as well as virtual desktops
 
 ## Requirements
 
